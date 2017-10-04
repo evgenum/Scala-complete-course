@@ -41,25 +41,32 @@ object Computation extends App with Data {
   */
 object CurriedComputation extends App with Data {
 
-  def curriedComputation(filterData: String)(dataProducer: Array[String]): Array[String] = ???
+  def curriedComputation(filterData: String)(dataProducer: Array[String]): Array[String] = {
+    val filterArray = filterData.split(" ")
+    dataProducer.filter(dataItem => filterArray.contains(dataItem))
+  }
 
-  val partiallyAppliedCurriedFunction = ???
+  val partiallyAppliedCurriedFunction = curriedComputation(filterData)_
 
-  //val result = partiallyAppliedCurriedFunction(dataArray)
-  //result.foreach(println)
+  val result = partiallyAppliedCurriedFunction(dataArray)
+  result.foreach(println)
 }
 
 /**
   * Допишите реализации методов так, что бы результат совпадал с предыдущими.
   *
   * При этом постарайтесь минимизировать количество разбиений строки filterData на отдельные слова.
+  * Чтобы избежать многократного разбиения строки на слова, сначала выполняется метод split, а уже к полученному массиву
+  * строк метод contains
   */
 object FunctionalComputation extends App with Data {
 
-  def functionalComputation(filterData: String): (Array[String]) => Array[String] = ???
+  def functionalComputation(filterData: Array[String]): (Array[String]) => Array[String] =
+    dataArray => filterData.filter(dataItem =>dataArray.contains(dataItem))
 
-  val filterApplied = functionalComputation(???)
 
-  val result = filterApplied(???)
+  val filterApplied = functionalComputation(filterData.split(" "))
+
+  val result = filterApplied(dataArray)
   result.foreach(println)
 }
