@@ -50,7 +50,7 @@ object Fibonacci2 extends App {
       fibsImpl(num, acc :+ (acc(l-1) + acc(l-2)))
   }
   //println(fibs2(16))
-  println(fibs2(-1))
+  println(fibs2(1000))
 }
 
 
