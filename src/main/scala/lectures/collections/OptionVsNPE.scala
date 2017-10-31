@@ -1,6 +1,6 @@
 package lectures.collections
 
-import scala.util.Random
+import scala.util.{Random, Try}
 
 /**
   * В этом задании Вам предстоит работать с очень нестабильным внешним сервисом.
@@ -52,7 +52,7 @@ case class Connection(resource: Resource) {
   private val defaultResult = "something went wrong!"
 
   //ConnectionProducer.result(this)
-  def result(): String = ???
+  def result(): String = if(ConnectionProducer.result(this) == null) defaultResult else this.resource.name
 }
 
 case class Resource(name: String)
@@ -61,11 +61,26 @@ object OptionVsNPE extends App {
 
   def businessLogic: String = try {
     // ResourceProducer
-    val result: String = ???
+
+    val resource = ResourceProducer.produce match {
+      case null => throw new ResourceException
+      case x: Resource => x
+    }
+
+    def connection:Connection = ConnectionProducer.produce(resource) match {
+      case null => connection
+      case x: Connection => x
+    }
+
+    val result: String = connection.result()
+
     println(result)
     result
   } catch {
-    case e: ResourceException => ???
+    case e: ResourceException => {
+      println("Try again with new resource.")
+      businessLogic
+    }
   }
 
   businessLogic
