@@ -62,14 +62,14 @@ object OptionVsNPE extends App {
   def businessLogic: String = try {
     // ResourceProducer
 
-    val resource = ResourceProducer.produce match {
-      case null => throw new ResourceException
-      case x: Resource => x
+    val resource = Option(ResourceProducer.produce) match {
+      case Some(x) => x
+      case None => throw new ResourceException
     }
 
-    def connection:Connection = ConnectionProducer.produce(resource) match {
-      case null => connection
-      case x: Connection => x
+    def connection:Connection = Option(ConnectionProducer.produce(resource)) match {
+      case Some(x) => x
+      case None => connection
     }
 
     val result: String = connection.result()
