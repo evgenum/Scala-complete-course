@@ -89,10 +89,8 @@ object SortingStuff extends App {
       case junk@_ => stuffBox.copy(junk = junk :: stuffBox.junk)
     }
 
-    def findMyKnife(stuffBox: StuffBox): Boolean = stuffBox match {
-      case it => it.junk.contains(Knife)
-      case _ =>  false
-    }
+    def findMyKnife(stuffBox: StuffBox): Boolean =
+      stuffBox.junk.contains(Knife)
 
 
 
