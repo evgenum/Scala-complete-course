@@ -22,8 +22,8 @@ object Fibonacci extends App {
     }
   }
 
- // println(fibs(9))
-  println(fibs(1000))
+ println(fibs(-1))
+  //println(fibs(1000))
 }
 
 /**
