@@ -24,9 +24,7 @@ case class Traffic(degree: Double)
 
 object Courier {
   def couriers(courierCount: Int): List[Courier] =
-    (for (i <- 1 to courierCount) yield {
-      Courier(i)
-    }).toList
+    (1 to courierCount).map(i => Courier(i)).toList
 }
 
 case class Courier(index: Int) {
@@ -35,9 +33,9 @@ case class Courier(index: Int) {
 
 object Address {
   def addresses(addressesCount: Int): List[Address] =
-    (for (i <- 1 to addressesCount) yield {
+    (1 to addressesCount).map { i =>
       Address(s"$i$i$i")
-    }).toList
+    }.toList
 }
 
 case class Address(postIndex: String)
@@ -55,21 +53,15 @@ object CouriersWithComprehension extends App {
 
   // какие адреса были обслужены
   def serveAddresses(addresses: List[Address], couriers: List[Courier]) = {
-    var accum = 0
-    for (courier <- couriers;
-         trafficDegree = traffic().degree;
-         t <- 0 until courier.canServe if trafficDegree < 5 && accum < addresses.length
-    ) yield {
-      val addr = addresses(accum)
-      accum = accum + 1
-      addr
-    }
+
+    addresses.take(couriers.withFilter(x => traffic().degree < 5)
+      .map( courier => courier.canServe).sum)
   }
 
   def traffic(): Traffic = new Traffic(Math.random() * 10)
 
   def printServedAddresses(addresses: List[Address], couriers: List[Courier]) =
-    for (a <- serveAddresses(addresses, couriers)) {
+    serveAddresses(addresses, couriers) foreach { a =>
       println(a.postIndex)
     }
 
