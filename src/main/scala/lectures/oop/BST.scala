@@ -58,17 +58,11 @@ case class BSTImpl(value: Int,
     else Option(this)
 
 
-  def pow(x: Int, y: Int): Int = if(y < 0) 0 else if(y==0) 1 else (1 to y ).foldLeft(1)((acc, i) => acc*x)
+  def pow(x: Int, y: Int): Int = Math.pow(x,y).toInt
 
   def depth: Int = {
-    val l = this.left match {
-      case None => 0
-      case Some(x) => x.depth
-    }
-    val r = this.right match {
-      case None => 0
-      case Some(x) => x.depth
-    }
+    val l = this.left.map(_.depth).getOrElse(0)
+    val r = this.right.map(_.depth).getOrElse(0)
     Math.max(l,r) + 1
   }
     def ArrList(d:Int): IndexedSeq[List[Option[Int]]] = {
