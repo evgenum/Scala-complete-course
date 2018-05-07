@@ -1,6 +1,6 @@
 package lectures.eval
 
-import java.time.Clock
+import java.time.{Clock, Instant}
 
 import scala.collection.SeqView
 
@@ -27,7 +27,18 @@ object LazySchedulerView {
       */
     def lazySchedule(expirationTimeout: Long): SeqView[A, Seq[_]]  = {
       val i = c.instant().plusMillis(expirationTimeout)
-      ???
+      class ViewWithExpiration(val e: Instant, val s: Seq[A]) extends SeqView[A, Seq[_]] {
+
+        val v: SeqView[A, Seq[_]] = s.view
+        def iterator: Iterator[A] = if (c.instant().isBefore(i)) v.iterator else Iterator.empty
+
+        override def underlying: Seq[A] = if (c.instant().isBefore(i)) s else Seq.empty
+        def apply(n: Int) = if( c.instant().isBefore(i)) v.apply(n) else throw new Exception("View is expired.")
+
+        override def length: Int = if( c.instant().isBefore(i)) s.length else 0
+      }
+
+      new ViewWithExpiration(i, f)
     }
   }
 }
@@ -39,9 +50,7 @@ object LazySchedulerViewExample extends App {
   val v = List(1, 2, 3, 56)
   val d = v.lazySchedule(1300)
 
-  print(d.length)
+  println(d.length)
   Thread.sleep(1500)
-  print(d.length)
+  println(d.length)
 }
-
-

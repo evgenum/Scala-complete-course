@@ -27,8 +27,8 @@ trait GeneralBST[T] {
 }
 
 case class GeneralBSTImpl[T: Ordering](value: T,
-                                  left: Option[GeneralBSTImpl[T]] = None,
-                                  right: Option[GeneralBSTImpl[T]] = None)
+                                       left: Option[GeneralBSTImpl[T]] = None,
+                                       right: Option[GeneralBSTImpl[T]] = None)
     extends GeneralBST[T] {
 
   override def find(value: T): Option[GeneralBSTImpl[T]] =
@@ -39,9 +39,13 @@ case class GeneralBSTImpl[T: Ordering](value: T,
   override def add(newValue: T): GeneralBSTImpl[T] =
     if (newValue == this.value) this
     else if (newValue < this.value)
-      this.copy(left = this.left.map(_.add(newValue)) orElse Some(GeneralBSTImpl[T](newValue)))
+      this.copy(
+        left = this.left.map(_.add(newValue)) orElse Some(
+          GeneralBSTImpl[T](newValue)))
     else
-      this.copy(right = this.right.map(_.add(newValue)) orElse Some(GeneralBSTImpl[T](newValue)))
+      this.copy(
+        right = this.right.map(_.add(newValue)) orElse Some(
+          GeneralBSTImpl[T](newValue)))
 }
 
 object Application extends App {
@@ -55,17 +59,16 @@ object Application extends App {
     val r = new Random()
     def aString = r.alphanumeric.take(r.nextInt(10)).mkString
     var tree = GeneralBSTImpl[String](aString)
-    for(_ <- 1 to n) tree = tree.add(aString)
+    for (_ <- 1 to n) tree = tree.add(aString)
     tree
   }
-
 
   def createStuffBST(n: Int): GeneralBST[Watches] = {
     val r = new Random()
     def aString = r.alphanumeric.take(r.nextInt(10)).mkString
-    def aWatches = Watches(aString, r.nextFloat()*1000)
+    def aWatches = Watches(aString, r.nextFloat() * 1000)
     var tree = GeneralBSTImpl[Watches](aWatches)
-    for(_ <- 1 to n) tree = tree.add(aWatches)
+    for (_ <- 1 to n) tree = tree.add(aWatches)
     tree
   }
 
