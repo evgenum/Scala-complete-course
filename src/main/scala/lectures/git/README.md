@@ -51,6 +51,7 @@ git commit -m 'Commited fileA.txt'
 С чувством выполненного долга вы выключаете компьютер и идете домой. Но вы всю ночь ворочаетесь и не можете уснуть, потому что ваш внутренний перфекционист очень недоволен тем, что `fileB` был закоммичен раньше, чем `fileA`. Очень хорошо, что накануне вы внимательно слушали лекции про git и теперь точно знаете, как это можно исправить. Даже не позавтракав, вы прибегаете на работу, включаете компьютер и пишете следующие команды:
 
 ```
+
  git rebase -i head~~
  ddp //удалить строку и вставить под следующей
  :x
@@ -67,6 +68,7 @@ echo Nikulin > Balbes.txt
 git add Balbes.txt && git commit -m 'Commited Balbes'
 echo Morgunov > Bivaliy.txt
 git add Bivaliy.txt && git commit -m 'Commited Bivaliy'
+
 ```
 
 Тут вы понимаете, что незачем разбивать эту знаменитую троицу на три разных коммита, да и длинная история вам ни к чему. Поэтому надо их всех соединить в один коммит с комментарием `Samogonshiki`. Ваши действия:
@@ -74,6 +76,7 @@ git add Bivaliy.txt && git commit -m 'Commited Bivaliy'
 ```
 git reset head~~~ --soft
 git commit -m 'Samogonshiki'
+
 ```
 
 ### 5. Финальный босс
@@ -84,6 +87,7 @@ git commit -m 'Samogonshiki'
 echo Some hidden data > .hidden
 git add .hidden && git commit -m 'Added hidden file'
 echo .hidden >> .gitignore
+
 git add .gitignore && git commit -m 'Added gitignore'
 ```
 
@@ -92,5 +96,6 @@ git add .gitignore && git commit -m 'Added gitignore'
 ```
 git rm --cached .hidden
 git commit -m "Exclude .hidden from index"
+
 ```
 
