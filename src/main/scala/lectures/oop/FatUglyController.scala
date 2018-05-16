@@ -24,16 +24,23 @@ import java.security.MessageDigest
   */
 class FatUglyController {
 
-  def processRoute(route: String, requestBody: Option[Array[Byte]]): (Int, String) = {
+  sealed case class Response(code: Int, message: String)
+  object EmptyFile extends Response(400, "Can not upload empty file")
+  object ForbiddenFileSize extends Response(400, "File size should not be more than 8 MB")
+  object ForbiddenExtension extends Response(400, "Request contains forbidden extension")
+  case class Success(messageBody: String) extends Response(200, "Response:\n" + messageBody)
+  object RouteNotFound extends Response(404, "Route not found")
+
+  def processRoute(route: String, requestBody: Option[Array[Byte]]): Response = {
     val responseBuf = new StringBuilder()
     val databaseConnectionId = connectToPostgresDatabase()
     val mqConnectionId = connectToIbmMq()
     initializeLocalMailer()
     if (route == "/api/v1/uploadFile") {
       if (requestBody.isEmpty) {
-        return (400, "Can not upload empty file")
+        EmptyFile
       } else if (requestBody.get.length > 8388608) {
-        return (400, "File size should not be more than 8 MB")
+        ForbiddenFileSize
       } else {
         val stringBody = new String(requestBody.get.filter(_ != '\r'))
         val delimiter = stringBody.takeWhile(_ != '\n')
@@ -44,7 +51,7 @@ class FatUglyController {
           val extension = name.reverse.takeWhile(_ != '.').reverse
           val id = hash(file.trim)
           if (Seq("exe", "bat", "com", "sh").contains(extension)) {
-            return (400, "Request contains forbidden extension")
+            ForbiddenExtension
           }
           // Emulate file saving to disk
           responseBuf.append(s"- saved file $name to " + id + "." + extension + s" (file size: ${trimmedBody.length})\n")
@@ -54,10 +61,10 @@ class FatUglyController {
           send("admin@admin.tinkoff.ru", "File has been uploaded", s"Hey, we have got new file: $name")
         }
 
-        return (200, "Response:\n" + responseBuf.dropRight(1))
+        Success(responseBuf.dropRight(1).toString)
       }
     } else {
-      return (404, "Route not found")
+      RouteNotFound
     }
   }
 
