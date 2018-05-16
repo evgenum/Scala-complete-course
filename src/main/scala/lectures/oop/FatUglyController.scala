@@ -2,7 +2,6 @@ package lectures.oop
 
 import java.security.MessageDigest
 
-
 /**
   * Данный класс содержит код, наспех написанный одним джуниор-разработчиком,
   * который плохо слушал лекции по эффективному программированию.
@@ -24,22 +23,18 @@ import java.security.MessageDigest
   */
 class FatUglyController {
 
-  sealed case class Response(code: Int, message: String)
-  object EmptyFile extends Response(400, "Can not upload empty file")
-  object ForbiddenFileSize extends Response(400, "File size should not be more than 8 MB")
-  object ForbiddenExtension extends Response(400, "Request contains forbidden extension")
-  case class Success(messageBody: String) extends Response(200, "Response:\n" + messageBody)
-  object RouteNotFound extends Response(404, "Route not found")
-
-  def processRoute(route: String, requestBody: Option[Array[Byte]]): Response = {
+  val uploadRoute = "/api/v1/uploadFile"
+  val maxRequestLength = 8388608
+  def processRoute(route: String,
+                   requestBody: Option[Array[Byte]]): Response = {
     val responseBuf = new StringBuilder()
-    val databaseConnectionId = connectToPostgresDatabase()
-    val mqConnectionId = connectToIbmMq()
-    initializeLocalMailer()
-    if (route == "/api/v1/uploadFile") {
+    val databaseConnectionId = Database.connectToPostgresDatabase()
+    val mqConnectionId = Mq.connectToIbmMq()
+    LocalMailer.initializeLocalMailer()
+    if (route == uploadRoute) {
       if (requestBody.isEmpty) {
         EmptyFile
-      } else if (requestBody.get.length > 8388608) {
+      } else if (requestBody.get.length > maxRequestLength) {
         ForbiddenFileSize
       } else {
         val stringBody = new String(requestBody.get.filter(_ != '\r'))
@@ -54,11 +49,18 @@ class FatUglyController {
             ForbiddenExtension
           }
           // Emulate file saving to disk
-          responseBuf.append(s"- saved file $name to " + id + "." + extension + s" (file size: ${trimmedBody.length})\n")
+          responseBuf.append(
+            s"- saved file $name to " + id + "." + extension + s" (file size: ${trimmedBody.length})\n")
 
-          executePostgresQuery(databaseConnectionId, s"insert into files (id, name, created_on) values ('$id', '$name', current_timestamp)")
-          sendMessageToIbmMq(mqConnectionId, s"""<Event name="FileUpload"><Origin>SCALA_FTK_TASK</Origin><FileName>${name}</FileName></Event>""")
-          send("admin@admin.tinkoff.ru", "File has been uploaded", s"Hey, we have got new file: $name")
+          Database.executePostgresQuery(
+            databaseConnectionId,
+            s"insert into files (id, name, created_on) values ('$id', '$name', current_timestamp)")
+          Mq.sendMessageToIbmMq(
+            mqConnectionId,
+            s"""<Event name="FileUpload"><Origin>SCALA_FTK_TASK</Origin><FileName>${name}</FileName></Event>""")
+          LocalMailer.send("admin@admin.tinkoff.ru",
+                           "File has been uploaded",
+                           s"Hey, we have got new file: $name")
         }
 
         Success(responseBuf.dropRight(1).toString)
@@ -68,18 +70,16 @@ class FatUglyController {
     }
   }
 
-  def connectToPostgresDatabase(): Int = {
-    // DO NOT TOUCH
-    println("Connected to PostgerSQL database")
-    42 // pretty unique connection id
+  def hash(s: String): String = {
+    MessageDigest
+      .getInstance("SHA-1")
+      .digest(s.getBytes("UTF-8"))
+      .map("%02x".format(_))
+      .mkString
   }
+}
 
-  def executePostgresQuery(connectionId: Int, sql: String): String = {
-    // DO NOT TOUCH
-    println(s"Executed SQL statement on connection $connectionId: $sql")
-    s"Result of $sql"
-  }
-
+object Mq {
   def connectToIbmMq(): Int = {
     // DO NOT TOUCH
     println("Connected to IBM WebSphere super-duper MQ Manager")
@@ -91,18 +91,39 @@ class FatUglyController {
     println(s"Sent MQ message via $connectionId: $message")
     s"Message sending result for $message"
   }
+}
+object Database {
+
+  def connectToPostgresDatabase(): Int = {
+    // DO NOT TOUCH
+    println("Connected to PostgerSQL database")
+    42 // pretty unique connection id
+  }
+  def executePostgresQuery(connectionId: Int, sql: String): String = {
+    // DO NOT TOUCH
+    println(s"Executed SQL statement on connection $connectionId: $sql")
+    s"Result of $sql"
+  }
+}
+
+object LocalMailer {
 
   def initializeLocalMailer(): Unit = {
     // DO NOT TOUCH
     println("Initialized local mailer")
   }
-
   def send(email: String, subject: String, body: String): Unit = {
     // DO NOT TOUCH
     println(s"Sent email to $email with subject '$subject'")
   }
-
-  def hash(s: String): String = {
-    MessageDigest.getInstance("SHA-1").digest(s.getBytes("UTF-8")).map("%02x".format(_)).mkString
-  }
 }
+
+sealed case class Response(code: Int, message: String)
+object EmptyFile extends Response(400, "Can not upload empty file")
+object ForbiddenFileSize
+    extends Response(400, "File size should not be more than 8 MB")
+object ForbiddenExtension
+    extends Response(400, "Request contains forbidden extension")
+case class Success(messageBody: String)
+    extends Response(200, "Response:\n" + messageBody)
+object RouteNotFound extends Response(404, "Route not found")
