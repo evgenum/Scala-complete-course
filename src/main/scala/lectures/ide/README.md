@@ -18,13 +18,23 @@
 
 ### 2. Завести себе минимум 3 шаблона быстрой подстановки (Live templates)
 
-1. `main` :
+1. create `object` :
 
 ```
-def main (args: Array[String] ): Unit = {
-  
+object $NAME$ {
+    $END$
 }
 ```
 
+2. `Awai`:
 
+```
+Await.result( $VALUE$, Duration(10,'s'))$END$
+```
+
+3. `succ`:
+
+```
+Future.successful($NAME$)$END$
+```
 ### 3. Настроить 2 таски на прогон всех тестов: через IDEA и через SBT
