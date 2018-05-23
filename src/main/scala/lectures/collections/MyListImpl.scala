@@ -19,20 +19,22 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
   */
 object MyListImpl extends App {
 
-  case class MyList[T, M <: Seq[T]](data: Seq[T]) {
+  case class MyList[T, M](data: Seq[T]) {
 
-    def flatMap(f: (T => MyList[T, M])): MyList[T, M] =
+    def flatMap[U](f: (T => MyList[U, M])): MyList[U, M] =
       MyList(data.flatMap(inp => f(inp).data))
 
-    def map(f: T => T): MyList[T, M] = this.flatMap(inp => MyList(List(f(inp))))
+    def map[U](f: T => U): MyList[U, M] =
+      this.flatMap[U](inp => MyList(List(f(inp))))
 
     def foldLeft(acc: T)(f: ((T, T)) => T): T = {
       if (this.data.isEmpty) acc
       else MyList(this.data.tail).foldLeft(f((acc, this.data.head)))(f)
     }
 
-    def filter(f: T => Boolean) =
-      this.flatMap(inp => if (f(inp)) MyList(List(inp)) else MyList(List()))
+    def filter(f: T => Boolean): MyList[T, M] =
+      this.flatMap(inp =>
+        if (f(inp)) MyList(List(inp)) else MyList(List()))
   }
 
   class MyIndexedList[T](dataFrame: ArrayBuffer[T])
