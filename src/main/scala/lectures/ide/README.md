@@ -38,3 +38,19 @@ Await.result( $VALUE$, Duration(10,'s'))$END$
 Future.successful($NAME$)$END$
 ```
 ### 3. Настроить 2 таски на прогон всех тестов: через IDEA и через SBT
+
+#### Для запуска тестов в sbt
+Необходимо добавить в build.sbt:
+
+lazy val scalacheck = "org.scalacheck" %% "scalacheck" % "1.13.4"
+libraryDependencies += scalacheck % Test
+
+и запустить `test` в sbt shell
+
+#### Для запуска тестов в idea
+Необходимо перейти в параметры запуска, добавить конфигурацию, выбрать категорию scalaTest.
+В этой конфигурации выбрать:
+1. **Test kind**: **All in package**,
+2. **Search for tests**: **In whole project**
+
+Сохранить и запустить сохраненную конфигурацию.

@@ -61,3 +61,6 @@ libraryDependencies += "com.softwaremill.macwire" %% "proxy" % "2.3.0"
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.9"
 
 parallelExecution in ThisBuild := false
+
+lazy val scalacheck = "org.scalacheck" %% "scalacheck" % "1.13.4"
+libraryDependencies += scalacheck % Test
