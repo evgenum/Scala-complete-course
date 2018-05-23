@@ -62,3 +62,4 @@ lazy val root = (project in file("."))
     testOptions in oop := Seq(Tests.Filter(_ startsWith "lectures.oop")),
     assemblySettings
   )
+
